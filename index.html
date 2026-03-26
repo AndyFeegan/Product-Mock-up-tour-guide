@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresha Feature Walkthrough — Add a Team Member</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fresha-dark: #1a1a2e;
+    --fresha-purple: #7c3aed;
+    --fresha-purple-light: #a78bfa;
+    --fresha-purple-bg: #f3f0ff;
+    --fresha-green: #10b981;
+    --fresha-green-light: #d1fae5;
+    --fresha-gray-50: #f9fafb;
+    --fresha-gray-100: #f3f4f6;
+    --fresha-gray-200: #e5e7eb;
+    --fresha-gray-300: #d1d5db;
+    --fresha-gray-400: #9ca3af;
+    --fresha-gray-500: #6b7280;
+    --fresha-gray-600: #4b5563;
+    --fresha-gray-700: #374151;
+    --fresha-gray-800: #1f2937;
+    --fresha-white: #ffffff;
+    --fresha-red: #ef4444;
+    --fresha-orange: #f59e0b;
+    --sidebar-width: 220px;
+    --topbar-height: 56px;
+    --highlight-color: #7c3aed;
+    --pulse-color: rgba(124, 58, 237, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fresha-gray-100);
+    color: var(--fresha-gray-800);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ─── LAYOUT ─── */
+  .app-shell {
+    display: flex;
+    height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--fresha-dark);
+    color: var(--fresha-white);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    padding: 18px 20px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sidebar-logo .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--fresha-green);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .sidebar-nav {
+    padding: 12px 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--fresha-gray-400);
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    border-radius: 0;
+  }
+
+  .nav-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.9);
+  }
+
+  .nav-item.active {
+    background: rgba(124, 58, 237, 0.2);
+    color: var(--fresha-white);
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 4px; bottom: 4px;
+    width: 3px;
+    background: var(--fresha-purple);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .nav-icon {
+    width: 18px; height: 18px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  /* ─── MAIN AREA ─── */
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    height: var(--topbar-height);
+    background: var(--fresha-white);
+    border-bottom: 1px solid var(--fresha-gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+
+  .topbar-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--fresha-gray-800);
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--fresha-gray-100);
+    border: 1px solid var(--fresha-gray-200);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    color: var(--fresha-gray-400);
+    cursor: default;
+    min-width: 200px;
+  }
+
+  .avatar {
+    width: 34px; height: 34px;
+    background: var(--fresha-purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: default;
+  }
+
+  /* ─── CONTENT ─── */
+  .content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .content-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    position: relative;
+  }
+
+  .btn-primary {
+    background: var(--fresha-purple);
+    color: white;
+  }
+  .btn-primary:hover { background: #6d28d9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
+
+  .btn-secondary {
+    background: var(--fresha-white);
+    color: var(--fresha-gray-700);
+    border: 1px solid var(--fresha-gray-300);
+  }
+  .btn-secondary:hover { background: var(--fresha-gray-50); }
+
+  .btn-inactive {
+    background: var(--fresha-gray-200);
+    color: var(--fresha-gray-400);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ─── TEAM TABLE ─── */
+  .team-table {
+    background: var(--fresha-white);
+    border-radius: 12px;
+    border: 1px solid var(--fresha-gray-200);
+    overflow: hidden;
+  }
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr 80px;
+    padding: 12px 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--fresha-gray-400);
+    border-bottom: 1px solid var(--fresha-gray-200);
+    background: var(--fresha-gray-50);
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr 80px;
+    padding: 14px 20px;
+    font-size: 13.5px;
+    align-items: center;
+    border-bottom: 1px solid var(--fresha-gray-100);
+    transition: background 0.1s;
+  }
+
+  .table-row:hover { background: var(--fresha-gray-50); }
+  .table-row:last-child { border-bottom: none; }
+
+  .member-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .member-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .member-name { font-weight: 600; color: var(--fresha-gray-800); }
+  .member-email { font-size: 12px; color: var(--fresha-gray-400); margin-top: 1px; }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .status-active { background: var(--fresha-green-light); color: #065f46; }
+  .status-pending { background: #fef3c7; color: #92400e; }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .status-active .status-dot { background: var(--fresha-green); }
+  .status-pending .status-dot { background: var(--fresha-orange); }
+
+  .row-actions {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+
+  .row-action-btn {
+    width: 30px; height: 30px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fresha-gray-400);
+    transition: all 0.15s;
+  }
+
+  .row-action-btn:hover { background: var(--fresha-gray-100); color: var(--fresha-gray-700); }
+
+  /* ─── MODAL OVERLAY ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-overlay.visible { display: flex; }
+
+  .modal {
+    background: var(--fresha-white);
+    border-radius: 16px;
+    width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+    animation: modalIn 0.25s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+  }
+
+  .modal-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .modal-close {
+    width: 32px; height: 32px;
+    border: none;
+    background: var(--fresha-gray-100);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--fresha-gray-500);
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { background: var(--fresha-gray-200); }
+
+  .modal-body { padding: 20px 24px; }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fresha-gray-700);
+    margin-bottom: 6px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--fresha-gray-200);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--fresha-gray-800);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: var(--fresha-white);
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--fresha-purple);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+  }
+
+  .form-input::placeholder { color: var(--fresha-gray-300); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--fresha-gray-200);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--fresha-gray-800);
+    background: var(--fresha-white);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+  }
+
+  .form-select:focus {
+    outline: none;
+    border-color: var(--fresha-purple);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--fresha-gray-100);
+  }
+
+  /* ─── GUIDED TOUR ─── */
+  .tour-highlight {
+    position: relative;
+    z-index: 50;
+  }
+
+  .tour-highlight::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2.5px solid var(--highlight-color);
+    border-radius: 14px;
+    pointer-events: none;
+    animation: pulseRing 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulseRing {
+    0%, 100% { box-shadow: 0 0 0 0 var(--pulse-color); }
+    50% { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
+  }
+
+  .tour-tooltip {
+    position: absolute;
+    z-index: 200;
+    background: var(--fresha-dark);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    max-width: 280px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    animation: tooltipIn 0.3s ease;
+    display: none;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .tour-tooltip.visible { display: block; }
+
+  @keyframes tooltipIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .tour-tooltip-title {
+    font-weight: 700;
+    font-size: 14.5px;
+    margin-bottom: 6px;
+    color: var(--fresha-purple-light);
+  }
+
+  .tour-tooltip-text {
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 14px;
+  }
+
+  .tour-tooltip-step {
+    font-size: 11px;
+    color: var(--fresha-gray-400);
+    margin-bottom: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .tour-tooltip-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .tour-btn {
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .tour-btn-next {
+    background: var(--fresha-purple);
+    color: white;
+  }
+  .tour-btn-next:hover { background: #6d28d9; }
+
+  .tour-btn-skip {
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+  }
+  .tour-btn-skip:hover { color: white; }
+
+  /* ─── ARROW SVG ─── */
+  .tour-arrow {
+    position: absolute;
+    z-index: 199;
+    display: none;
+    pointer-events: none;
+  }
+
+  .tour-arrow.visible { display: block; }
+
+  .tour-arrow svg {
+    filter: drop-shadow(0 2px 6px rgba(124,58,237,0.3));
+  }
+
+  /* ─── TOUR OVERLAY DIM ─── */
+  .tour-dim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 40;
+    display: none;
+    transition: opacity 0.3s;
+  }
+
+  .tour-dim.visible { display: block; }
+
+  /* ─── PROGRESS BAR ─── */
+  .tour-progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--fresha-gray-200);
+    z-index: 300;
+    display: none;
+  }
+
+  .tour-progress.visible { display: block; }
+
+  .tour-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--fresha-purple), var(--fresha-purple-light));
+    border-radius: 0 4px 4px 0;
+    transition: width 0.4s ease;
+  }
+
+  /* ─── START TOUR BANNER ─── */
+  .tour-banner {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--fresha-dark);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 500;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: bannerIn 0.4s ease;
+    font-size: 14px;
+  }
+
+  @keyframes bannerIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  .tour-banner.hidden { display: none; }
+
+  .banner-icon {
+    width: 38px; height: 38px;
+    background: var(--fresha-purple);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .banner-text { font-weight: 500; }
+  .banner-text strong { font-weight: 700; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ─── SUCCESS TOAST ─── */
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--fresha-green);
+    color: white;
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 600;
+    box-shadow: 0 8px 30px rgba(16,185,129,0.3);
+    display: none;
+    animation: toastIn 0.3s ease;
+  }
+
+  .toast.visible { display: flex; align-items: center; gap: 10px; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── TOUR PROGRESS ─── -->
+<div class="tour-progress" id="tourProgress">
+  <div class="tour-progress-bar" id="tourProgressBar" style="width: 0%"></div>
+</div>
+
+<!-- ─── TOUR DIM ─── -->
+<div class="tour-dim" id="tourDim"></div>
+
+<!-- ─── SUCCESS TOAST ─── -->
+<div class="toast" id="toast">
+  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+  <span>Team member added successfully!</span>
+</div>
+
+<!-- ─── APP SHELL ─── -->
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><span class="logo-dot"></span>fresha</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Calendar
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Clients
+      </div>
+
+      <div class="sidebar-section">Management</div>
+      <div class="nav-item active" id="navTeam">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Team
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        Services
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Products
+      </div>
+
+      <div class="sidebar-section">Reports</div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Analytics
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z"/></svg>
+        Settings
+      </div>
+    </nav>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-area">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title">Team Members</div>
+      <div class="topbar-actions">
+        <div class="topbar-search">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search...
+        </div>
+        <div class="avatar">AS</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <div class="content-header">
+        <h2>Team <span style="color:var(--fresha-gray-400); font-weight:400; font-size:16px; margin-left:8px;">4 members</span></h2>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-secondary">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export
+          </button>
+          <button class="btn btn-primary" id="addTeamBtn">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Add team member
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="team-table">
+        <div class="table-header">
+          <div>Name</div>
+          <div>Role</div>
+          <div>Status</div>
+          <div>Bookings</div>
+          <div></div>
+        </div>
+        <div class="table-row">
+          <div class="member-info">
+            <div class="member-avatar" style="background:#7c3aed">AS</div>
+            <div><div class="member-name">Anna Smith</div><div class="member-email">anna@salon.com</div></div>
+          </div>
+          <div style="color:var(--fresha-gray-600)">Owner</div>
+          <div><span class="status-badge status-active"><span class="status-dot"></span>Active</span></div>
+          <div style="color:var(--fresha-gray-600)">142</div>
+          <div class="row-actions">
+            <button class="row-action-btn"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="row-action-btn"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+          </div>
+        </div>
+        <div class="table-row">
+          <div class="member-info">
+            <div class="member-avatar" style="background:#10b981">MJ</div>
+            <div><div class="member-name">Maria Jones</div><div class="member-email">maria@salon.com</div></div>
+          </div>
+          <div style="color:var(--fresha-gray-600)">Stylist</div>
+          <div><span class="status-badge status-active"><span class="status-dot"></span>Active</span></div>
+          <div style="color:var(--fresha-gray-600)">98</div>
+          <div class="row-actions">
+            <button class="row-action-btn"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="row-action-btn"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+          </div>
+        </div>
+        <div class="table-row">
+          <div class="member-info">
+            <div class="member-avatar" style="background:#f59e0b">TW</div>
+            <div><div class="member-name">Tom Williams</div><div class="member-email">tom@salon.com</div></div>
+          </div>
+          <div style="color:var(--fresha-gray-600)">Barber</div>
+          <div><span class="status-badge status-active"><span class="status-dot"></span>Active</span></div>
+          <div style="color:var(--fresha-gray-600)">76</div>
+          <div class="row-actions">
+            <button class="row-action-btn"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="row-action-btn"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+          </div>
+        </div>
+        <div class="table-row">
+          <div class="member-info">
+            <div class="member-avatar" style="background:#ef4444">LP</div>
+            <div><div class="member-name">Lisa Park</div><div class="member-email">lisa@salon.com</div></div>
+          </div>
+          <div style="color:var(--fresha-gray-600)">Therapist</div>
+          <div><span class="status-badge status-pending"><span class="status-dot"></span>Pending</span></div>
+          <div style="color:var(--fresha-gray-600)">—</div>
+          <div class="row-actions">
+            <button class="row-action-btn"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="row-action-btn"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ADD MEMBER MODAL ─── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add team member</h3>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" id="firstName" type="text" placeholder="e.g. Sarah">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" id="lastName" type="text" placeholder="e.g. Johnson">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" id="email" type="email" placeholder="e.g. sarah@salon.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone number</label>
+        <input class="form-input" id="phone" type="tel" placeholder="e.g. +44 7911 123456">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="roleSelect">
+            <option value="">Select a role...</option>
+            <option>Stylist</option>
+            <option>Barber</option>
+            <option>Therapist</option>
+            <option>Nail Technician</option>
+            <option>Receptionist</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Permission level</label>
+          <select class="form-select" id="permSelect">
+            <option value="">Select level...</option>
+            <option>Basic</option>
+            <option>Standard</option>
+            <option>Admin</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="modalCancel">Cancel</button>
+      <button class="btn btn-inactive" id="saveBtn">Save team member</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOUR TOOLTIPS (positioned dynamically) ─── -->
+<div class="tour-tooltip" id="tooltip1">
+  <div class="tour-tooltip-step">Step 1 of 4</div>
+  <div class="tour-tooltip-title">Navigate to Team</div>
+  <div class="tour-tooltip-text">In the sidebar, click <strong>Team</strong> under Management to see all your team members.</div>
+  <div class="tour-tooltip-actions">
+    <button class="tour-btn tour-btn-skip" onclick="endTour()">Skip tour</button>
+    <button class="tour-btn tour-btn-next" onclick="nextStep()">Got it →</button>
+  </div>
+</div>
+
+<div class="tour-tooltip" id="tooltip2">
+  <div class="tour-tooltip-step">Step 2 of 4</div>
+  <div class="tour-tooltip-title">Click "Add team member"</div>
+  <div class="tour-tooltip-text">Use this button to open the form. You can add stylists, barbers, therapists, and other team roles.</div>
+  <div class="tour-tooltip-actions">
+    <button class="tour-btn tour-btn-skip" onclick="endTour()">Skip tour</button>
+    <button class="tour-btn tour-btn-next" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<div class="tour-tooltip" id="tooltip3">
+  <div class="tour-tooltip-step">Step 3 of 4</div>
+  <div class="tour-tooltip-title">Fill in the details</div>
+  <div class="tour-tooltip-text">Enter the team member's name, email, phone, and assign their role and permissions.</div>
+  <div class="tour-tooltip-actions">
+    <button class="tour-btn tour-btn-skip" onclick="endTour()">Skip tour</button>
+    <button class="tour-btn tour-btn-next" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<div class="tour-tooltip" id="tooltip4">
+  <div class="tour-tooltip-step">Step 4 of 4</div>
+  <div class="tour-tooltip-title">Save & send invite</div>
+  <div class="tour-tooltip-text">Once all fields are complete, the button turns <strong>purple</strong>. Click to add them and send an invite email.</div>
+  <div class="tour-tooltip-actions">
+    <button class="tour-btn tour-btn-skip" onclick="endTour()">End tour</button>
+    <button class="tour-btn tour-btn-next" onclick="nextStep()">Finish ✓</button>
+  </div>
+</div>
+
+<!-- ─── TOUR ARROWS ─── -->
+<div class="tour-arrow" id="arrow1">
+  <svg width="60" height="60" viewBox="0 0 60 60"><path d="M50 10 C40 10, 20 15, 15 45" stroke="#7c3aed" stroke-width="2.5" fill="none" stroke-dasharray="4 3"/><polygon points="12,40 18,48 10,48" fill="#7c3aed"/></svg>
+</div>
+<div class="tour-arrow" id="arrow2">
+  <svg width="60" height="80" viewBox="0 0 60 80"><path d="M10 70 C10 40, 30 20, 50 10" stroke="#7c3aed" stroke-width="2.5" fill="none" stroke-dasharray="4 3"/><polygon points="46,7 55,12 48,16" fill="#7c3aed"/></svg>
+</div>
+
+<!-- ─── START BANNER ─── -->
+<div class="tour-banner" id="tourBanner">
+  <div class="banner-icon">
+    <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5"/></svg>
+  </div>
+  <div class="banner-text"><strong>Feature Walkthrough:</strong> How to add a team member</div>
+  <button class="btn btn-primary" style="padding:8px 20px;font-size:13px;" onclick="startTour()">Start Tour</button>
+  <button class="tour-btn tour-btn-skip" style="color:rgba(255,255,255,0.4)" onclick="dismissBanner()">Dismiss</button>
+</div>
+
+<script>
+  // ─── STATE ───
+  let currentStep = 0;
+  const totalSteps = 4;
+
+  // ─── ELEMENTS ───
+  const addBtn = document.getElementById('addTeamBtn');
+  const modal = document.getElementById('modalOverlay');
+  const modalCloseBtn = document.getElementById('modalClose');
+  const modalCancelBtn = document.getElementById('modalCancel');
+  const saveBtn = document.getElementById('saveBtn');
+  const navTeam = document.getElementById('navTeam');
+  const tourDim = document.getElementById('tourDim');
+  const tourProgress = document.getElementById('tourProgress');
+  const tourProgressBar = document.getElementById('tourProgressBar');
+  const banner = document.getElementById('tourBanner');
+  const toast = document.getElementById('toast');
+
+  const tooltips = [
+    document.getElementById('tooltip1'),
+    document.getElementById('tooltip2'),
+    document.getElementById('tooltip3'),
+    document.getElementById('tooltip4')
+  ];
+
+  const arrows = [
+    document.getElementById('arrow1'),
+    document.getElementById('arrow2')
+  ];
+
+  // Track form completion
+  const formInputs = ['firstName', 'lastName', 'email', 'phone', 'roleSelect', 'permSelect'];
+  formInputs.forEach(id => {
+    document.getElementById(id).addEventListener('input', checkFormComplete);
+    document.getElementById(id).addEventListener('change', checkFormComplete);
+  });
+
+  function checkFormComplete() {
+    const allFilled = formInputs.every(id => document.getElementById(id).value.trim() !== '');
+    if (allFilled) {
+      saveBtn.classList.remove('btn-inactive');
+      saveBtn.classList.add('btn-primary');
+      saveBtn.style.pointerEvents = 'auto';
+      saveBtn.style.cursor = 'pointer';
+    } else {
+      saveBtn.classList.add('btn-inactive');
+      saveBtn.classList.remove('btn-primary');
+      saveBtn.style.pointerEvents = 'none';
+    }
+  }
+
+  // ─── MODAL ───
+  addBtn.addEventListener('click', () => { modal.classList.add('visible'); });
+  modalCloseBtn.addEventListener('click', closeModal);
+  modalCancelBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+  function closeModal() {
+    modal.classList.remove('visible');
+    // Reset form
+    formInputs.forEach(id => document.getElementById(id).value = '');
+    saveBtn.classList.add('btn-inactive');
+    saveBtn.classList.remove('btn-primary');
+    saveBtn.style.pointerEvents = 'none';
+  }
+
+  saveBtn.addEventListener('click', () => {
+    if (saveBtn.classList.contains('btn-primary')) {
+      closeModal();
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 3000);
+    }
+  });
+
+  // ─── TOUR ENGINE ───
+  function dismissBanner() {
+    banner.classList.add('hidden');
+  }
+
+  function startTour() {
+    banner.classList.add('hidden');
+    currentStep = 1;
+    tourDim.classList.add('visible');
+    tourProgress.classList.add('visible');
+    showStep(currentStep);
+  }
+
+  function endTour() {
+    currentStep = 0;
+    tourDim.classList.remove('visible');
+    tourProgress.classList.remove('visible');
+    tourProgressBar.style.width = '0%';
+    tooltips.forEach(t => t.classList.remove('visible'));
+    arrows.forEach(a => a.classList.remove('visible'));
+    clearHighlights();
+    modal.classList.remove('visible');
+    // Show banner again
+    banner.classList.remove('hidden');
+  }
+
+  function nextStep() {
+    currentStep++;
+    if (currentStep > totalSteps) {
+      endTour();
+      return;
+    }
+    showStep(currentStep);
+  }
+
+  function showStep(step) {
+    // Hide all tooltips & arrows
+    tooltips.forEach(t => t.classList.remove('visible'));
+    arrows.forEach(a => a.classList.remove('visible'));
+    clearHighlights();
+
+    // Update progress
+    tourProgressBar.style.width = ((step / totalSteps) * 100) + '%';
+
+    switch (step) {
+      case 1: showStep1(); break;
+      case 2: showStep2(); break;
+      case 3: showStep3(); break;
+      case 4: showStep4(); break;
+    }
+  }
+
+  function clearHighlights() {
+    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+  }
+
+  function showStep1() {
+    modal.classList.remove('visible');
+    navTeam.classList.add('tour-highlight');
+    const rect = navTeam.getBoundingClientRect();
+    const tt = tooltips[0];
+    tt.style.top = (rect.top - 10) + 'px';
+    tt.style.left = (rect.right + 20) + 'px';
+    tt.classList.add('visible');
+
+    // Arrow pointing at Team nav
+    const arrow = arrows[0];
+    arrow.style.top = (rect.top - 20) + 'px';
+    arrow.style.left = (rect.right + 2) + 'px';
+    arrow.classList.add('visible');
+  }
+
+  function showStep2() {
+    modal.classList.remove('visible');
+    addBtn.classList.add('tour-highlight');
+    const rect = addBtn.getBoundingClientRect();
+    const tt = tooltips[1];
+    tt.style.top = (rect.bottom + 16) + 'px';
+    tt.style.left = (rect.left - 100) + 'px';
+    tt.classList.add('visible');
+
+    // Arrow pointing up at button
+    const arrow = arrows[1];
+    arrow.style.top = (rect.bottom - 2) + 'px';
+    arrow.style.left = (rect.left + 30) + 'px';
+    arrow.classList.add('visible');
+  }
+
+  function showStep3() {
+    // Open modal for steps 3 & 4
+    modal.classList.add('visible');
+    setTimeout(() => {
+      const modalBody = document.querySelector('.modal-body');
+      modalBody.classList.add('tour-highlight');
+      const rect = modalBody.getBoundingClientRect();
+      const tt = tooltips[2];
+      tt.style.top = (rect.top + 40) + 'px';
+      tt.style.left = (rect.right + 20) + 'px';
+      tt.classList.add('visible');
+    }, 300);
+  }
+
+  function showStep4() {
+    modal.classList.add('visible');
+    setTimeout(() => {
+      saveBtn.classList.add('tour-highlight');
+      const rect = saveBtn.getBoundingClientRect();
+      const tt = tooltips[3];
+      tt.style.top = (rect.top - 160) + 'px';
+      tt.style.left = (rect.left - 180) + 'px';
+      tt.classList.add('visible');
+    }, 200);
+  }
+</script>
+
+</body>
+</html>
